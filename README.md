@@ -10,6 +10,16 @@
 	* `var s = bundle.readText("data/file.txt") == string`
 	* `var img = bundle.readImg("img/logo.jpg") == ImageElement`
 
+## Example Bundle
+This PNG contains the following files:  
+
+* xml.dae
+* data.json
+* portrait.png  
+
+![packed bundle](https://dl.dropboxusercontent.com/u/20655747/resource.png)
+
+
 ## Compression
 * Find the `wb.exe` tool in `encoder\bin\Release`
 * In the command line call `wb.exe -v -i root_folder -o output.wb`
