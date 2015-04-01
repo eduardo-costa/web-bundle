@@ -1,0 +1,2 @@
+F:\development\project\web\thelab\web-bundle\encoder\obj\x86\Debug\jsc.exe
+F:\development\project\web\thelab\web-bundle\encoder\obj\x86\Debug\jsc.pdb

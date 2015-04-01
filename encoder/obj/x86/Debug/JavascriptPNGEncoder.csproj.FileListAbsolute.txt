@@ -1,0 +1,14 @@
+C:\Users\eduardo\AppData\Local\Temporary Projects\JavascriptPNGEncoder\bin\Debug\JavascriptPNGEncoder.exe
+C:\Users\eduardo\AppData\Local\Temporary Projects\JavascriptPNGEncoder\bin\Debug\JavascriptPNGEncoder.pdb
+C:\Users\eduardo\AppData\Local\Temporary Projects\JavascriptPNGEncoder\obj\x86\Debug\JavascriptPNGEncoder.exe
+C:\Users\eduardo\AppData\Local\Temporary Projects\JavascriptPNGEncoder\obj\x86\Debug\JavascriptPNGEncoder.pdb
+F:\development\project\cs\thelab\JavascriptPNGEncoder\JavascriptPNGEncoder\obj\x86\Debug\JavascriptPNGEncoder.exe
+F:\development\project\cs\thelab\JavascriptPNGEncoder\JavascriptPNGEncoder\obj\x86\Debug\JavascriptPNGEncoder.pdb
+F:\development\project\cs\thelab\JavascriptPNGEncoder\bin\Debug\jpe.exe
+F:\development\project\cs\thelab\JavascriptPNGEncoder\bin\Debug\jpe.pdb
+F:\development\project\cs\thelab\JavascriptPNGEncoder\obj\x86\Debug\jpe.exe
+F:\development\project\cs\thelab\JavascriptPNGEncoder\obj\x86\Debug\jpe.pdb
+F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\bin\Debug\jsc.exe
+F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\bin\Debug\jsc.pdb
+F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\obj\x86\Debug\jsc.exe
+F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\obj\x86\Debug\jsc.pdb

@@ -1,0 +1,8 @@
+F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\bin\Release\jsc.exe
+F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\bin\Release\jsc.pdb
+F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\obj\x86\Release\jsc.exe
+F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\obj\x86\Release\jsc.pdb
+F:\development\project\web\thelab\js-compressor\encoder\obj\x86\Release\jsc.exe
+F:\development\project\web\thelab\js-compressor\encoder\obj\x86\Release\jsc.pdb
+F:\development\project\web\thelab\js-compressor\encoder\bin\Release\jsc.exe
+F:\development\project\web\thelab\js-compressor\encoder\bin\Release\jsc.pdb

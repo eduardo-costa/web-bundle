@@ -1,0 +1,8 @@
+F:\development\project\web\thelab\web-bundle\encoder\bin\Debug\wb.exe
+F:\development\project\web\thelab\web-bundle\encoder\bin\Debug\wb.pdb
+F:\development\project\web\thelab\web-bundle\encoder\obj\x86\Debug\wb.exe
+F:\development\project\web\thelab\web-bundle\encoder\obj\x86\Debug\wb.pdb
+F:\development\project\web\thelab\web-bundle\encoder\obj\x86\Debug\WebBundleEncoder.csprojResolveAssemblyReference.cache
+F:\development\project\web\thelab\web-bundle\encoder\bin\Debug\wb.exe.config
+F:\development\project\web\thelab\web-bundle\encoder\bin\Debug\ICSharpCode.SharpZipLib.dll
+F:\development\project\web\thelab\web-bundle\encoder\bin\Debug\Pngcs.dll

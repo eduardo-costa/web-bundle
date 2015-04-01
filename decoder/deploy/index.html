@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<script src="js/wb.js"></script>	
+	<title>Web Bundle Example</title>	
+</head>
+<body>	
+	<script>
+	//creates the bundle class.
+	//tells to keep stored the full parsed buffer.
+	var b = new Bundle(true);
+	
+	//shows the instance.
+	console.log(b);
+	
+	//Loads an example bundle from the data folder.
+	b.load("data/resource.wb",function(d,p) 
+	{
+		//check load progress.
+		console.log(p);
+		
+		//if 100%
+		if(p>=1)
+		{
+			//if data is valid.
+			if(d==null)return;			
+			
+			//reads an image from the 'portrait.jpg' byte buffer.
+			d.readImg("portrait.png",function(img)
+			{
+				document.body.appendChild(img);
+			});			
+			
+			//loads a json string.
+			console.log(d.readText("data.json"));
+			
+			//loads a json parsed string.
+			console.log(d.readJSON("data.json"));
+			
+			//loads a XML string.
+			console.log(d.readText("xml.dae").substr(0,500));			
+		}		
+	});	
+	</script>
+</body>
+</html>
