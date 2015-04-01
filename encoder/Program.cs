@@ -19,7 +19,7 @@ namespace wb
         /// <summary>
         /// Error codes.
         /// </summary>
-        static int ERROR_INVALID_ARGS          = 1;
+        //static int ERROR_INVALID_ARGS          = 1;
         static int ERROR_PATH_NOT_FOUND        = 2;
         static int ERROR_NO_FILES              = 3;
         static int ERROR_OUTPUT_NOT_FOUND      = 4;
@@ -84,10 +84,11 @@ namespace wb
         static int Main(string[] args)
         {
             int arglen       = args.Length;
+            bool is_help = false;
             if (arglen <= 1) 
             { 
-                Console.WriteLine("Not enough arguments!");
-                return ERROR_INVALID_ARGS; 
+                //Console.WriteLine("Not enough arguments!");
+                is_help = true;                
             }
 
             is_verbose     = false;
@@ -100,15 +101,24 @@ namespace wb
             {
                 switch (args[i])
                 {
+                    case "-h":    is_help = true; break;
                     case "-r":    is_recursive = true; break;
                     case "-i":    if (i < (arglen - 1)) resource_path = args[i + 1]; break;
                     case "-o":    if (i < (arglen - 1)) bundle_path   = args[i + 1]; break;
-                    case "-v":    is_verbose = true; break;
-                    case "-c":    store_channels = true; break;
+                    case "-v":    is_verbose = true; break;                    
                 }
             }
 
-            LogLine("Web Bundle Packer - v" + VERSION);
+            Console.WriteLine("Web Bundle Packer - v" + VERSION);
+
+            if (is_help)
+            {
+                Console.WriteLine("  -h outputs help");
+                Console.WriteLine("  -r recursive search");
+                Console.WriteLine("  -i input path");
+                Console.WriteLine("  -o output file");
+                Console.WriteLine("  -v enable verbose");
+            }
 
             if (string.IsNullOrEmpty(resource_path))
             { 
@@ -124,7 +134,15 @@ namespace wb
 
             LogLine("Encoding [" + resource_path + "] recursive["+is_recursive+"] @ ["+bundle_path+"]");
 
-            bundle_files = Directory.GetFiles(resource_path, "*.*", is_recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+            try
+            {
+                bundle_files = Directory.GetFiles(resource_path, "*.*", is_recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+            }
+            catch (Exception err)
+            {                
+                if(err!=null)LogLine("Error: Wrong path!");
+                return ERROR_NO_FILES;
+            }
 
             if (bundle_files.Length <= 0)
             {
@@ -194,6 +212,8 @@ namespace wb
 
             int bw = 0;
             int bh = 0;
+
+            LogLine("Generating PNG bundle...");
 
             //Writes the buffer data in the Bitmap
             //GenerateBundle(bundle_path,buffer,MAX_WIDTH,out bw, out bh);
@@ -321,7 +341,7 @@ namespace wb
             p_w = w;
             p_h = h;
 
-            int k = 0;
+            //int k = 0;
 
             /*
             //Create the bitmap
