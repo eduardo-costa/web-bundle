@@ -4,40 +4,22 @@
   <output>
     <movie outputType="CustomBuild" />
     <movie input="" />
-    <movie path="deploy\burner\js\app.js" />
+    <movie path="" />
     <movie fps="0" />
     <movie width="0" />
     <movie height="0" />
     <movie version="1" />
     <movie minorVersion="0" />
-    <movie platform="JavaScript" />
-    <movie background="#FFFFFF" />
+    <movie platform="Default" />
+    <movie background="#000000" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="source" />
+    <!-- example: <class path="..." /> -->
   </classpaths>
-  <!-- Build options -->
-  <build>
-    <option directives="html&#xA;profile&#xA;js-es5&#xA;js-flatten" />
-    <option flashStrict="False" />
-    <option noInlineOnDebug="False" />
-    <option mainClass="Burner" />
-    <option enabledebug="False" />
-    <option additional="" />
-  </build>
-  <!-- haxelib libraries -->
-  <haxelib>
-    <!-- example: <library name="..." /> -->
-  </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <compile path="src\Main.hx" />
-    <compile path="src\MainHTML.hx" />
-    <compile path="source\Dungeon00.hx" />
-    <compile path="source\examples\dungeon\DungeonApp.hx" />
-    <compile path="source\examples\ubershader\Main.hx" />
-    <compile path="source\Burner.hx" />
+    <!-- example: <compile path="..." /> -->
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
@@ -51,7 +33,7 @@
   <options>
     <option showHiddenPaths="False" />
     <option testMovie="Webserver" />
-    <option testMovieCommand="deploy\index.html" />
+    <option testMovieCommand="deploy/index.html" />
   </options>
   <!-- Plugin storage -->
   <storage />

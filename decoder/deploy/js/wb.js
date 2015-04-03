@@ -3,6 +3,11 @@ Creates the Bundle manager.
 //*/
 var Bundle = function Bundle(p_store_buffer)
 {
+	//URL class
+	var URL  = window.URL || window.webkitURL;
+	//Fallback in case URL is not available.
+	if(URL == null) URL = { createObjectURL: function(d) { return ""; } };
+	
 	var ref = this;
 	/**
 	Container of the loaded bundles.
@@ -63,26 +68,23 @@ var Bundle = function Bundle(p_store_buffer)
 	ref.parseImg = 
 	function(p_buffer,p_callback,p_type)
 	{
-		var mt   = p_type==null ? "application/octet-stream" : p_type;
-		var blob = new Blob( [ p_buffer ],{ type: mt });
-		var URL  = window.URL || window.webkitURL;			
-		var img  = new Image();
-		img.onload = 
-		function(ev)
-		{			
-			if(p_callback!=null)
-			{				
-				p_callback(img);			
-			}
-		};
-		img.onerror = 
-		function(ev)
-		{			
-			console.error("bundle> failed to parse <img>");
-		};
-		img.src = URL.createObjectURL(blob);
+		var mt   	= p_type==null ? "application/octet-stream" : p_type;
+		var img  	= new Image();
+		img.onload  = function(ev) { if(p_callback!=null)p_callback(img);	 };
+		img.onerror = function(ev) { console.error("bundle> failed to parse <img>"); }
+		img.src 	= ref.parseURI(p_buffer,mt);
 		return img;
 	};
+	
+	/**
+	Parses the byte buffer into an URI.
+	//*/
+	ref.parseURI = 
+	function(p_buffer,p_type)
+	{
+		var blob = p_type == null ? new Blob([p_buffer]) : new Blob( [ p_buffer ],{ type: p_type });		
+		return URL.createObjectURL(blob);
+	}
 	
 	/**
 	Parses an ArrayBuffer of Bundle data.
@@ -95,8 +97,7 @@ var Bundle = function Bundle(p_store_buffer)
 			var k  = 0;	
 			var h  = "";			
 			var pc = p_w * p_h;
-			var bb = 			
-			new Uint8Array(pc * 3);
+			var bb = new Uint8Array(pc * 3);
 			
 			if(ref.storeBuffer) ref.buffer = bb;
 			
@@ -112,6 +113,7 @@ var Bundle = function Bundle(p_store_buffer)
 			//extract entries header string
 			while(k < bb.length)
 			{
+				//stops on string \0 char
 				if(bb[k]<5)   { k++; break; } //was testing 0 but possibly the encoding messed up the value
 				h += String.fromCharCode(bb[k++]);
 			}
@@ -127,46 +129,26 @@ var Bundle = function Bundle(p_store_buffer)
 			//create header data structures [path,type,byte_count]
 			for(var i=0;i<htks.length;i++)
 			{
+				//ignore invalid header entries
 				if(htks[i]=="") continue;
 				var hdtks = htks[i].split(",");
 				var hd    = {};
-				hd.path   = hdtks[0];
-				hd.type   = hdtks[1];
-				hd.length = parseInt(hdtks[2]);
+				hd.path   = hdtks[0];			//original file path
+				hd.type   = hdtks[1];			//file extension/type
+				hd.length = parseInt(hdtks[2]); //length in bytes
 				ref.entries.push(hd);
 			}
 			
 			//for each entry extract the Uint8Array sector from the bundle buffer.
 			var el = ref.entries;		
-			//var ss="";
-			//console.log("parsing "+el.length+" entries");
+			
 			for(var i=0;i<el.length;i++)
 			{
 				var hd    = el[i];				
-				var eb    = bb.subarray(k,k+hd.length);				
-				k+=hd.length;
-				//ss="";
-				//console.log("==== "+hd.path+" ["+eb.length+"]");
-				//for(var j=0;j<10;j++) ss+="["+j+","+eb[j]+",'"+String.fromCharCode(eb[j])+"']\n";
-				//ss+="...\n";
-				//for(var j=0;j<10;j++) { var m = (eb.length-10)+j; ss+="["+m+","+eb[m]+",'"+String.fromCharCode(eb[m])+"']\n"; }
-				//console.log(ss);
-				ref.data[hd.path] = eb;
-				//console.log("====");
-			}						
-			
-			/*
-			var txt = ref.readText("1x1.png.txt").split(" ");
-			var bin = ref.read("1x1.png");
-			ss = "";
-			for(var i=0;i<bin.length;i++)
-			{
-				var s0 = txt[i];
-				var s1 = bin[i]+"";
-				if(s0 != s1) console.log(i+" "+s0+" "+s1);
-				//ss += "["+txt[i]+","+bin[i]+"]\n";
-			}
-			//*/
+				var eb    = bb.subarray(k,k+hd.length); //extract the bytes in the exact sector.				
+				k+=hd.length;				
+				ref.data[hd.path] = eb;				
+			}									
 			if(p_callback != null) p_callback(ref);			
 		});			
 	};
@@ -180,8 +162,7 @@ var Bundle = function Bundle(p_store_buffer)
 		ref.url = p_url;
 		var ld = new XMLHttpRequest();		
 		ld.open( "GET", p_url, true );		
-		ld.responseType = "arraybuffer";
-		//if (ld.overrideMimeType != null) {  ld.overrideMimeType(p_binary ? "application/octet-stream" : "text/plain");  }		
+		ld.responseType = "arraybuffer";		
 		ld.onprogress 	= function(p_event)
 		{			
 			var bytesLoaded = p_event.loaded;
@@ -208,7 +189,7 @@ var Bundle = function Bundle(p_store_buffer)
 	Returns the ArrayBuffer of a given bundled data.
 	//*/
 	ref.read =
-	function(p_id) { if(ref.data[p_id]==null){ console.error("bundle> "+p_id+" not found."); } return ref.data[p_id]; };
+	function(p_id) { if(ref.data[p_id]==null){ console.error("bundle> ["+p_id+"] not found."); } return ref.data[p_id]; };
 	
 	/**
 	Returns the specified data as string.
@@ -216,11 +197,11 @@ var Bundle = function Bundle(p_store_buffer)
 	ref.readText = 
 	function(p_id) 
 	{
-		var d = ref.read(p_id);				
-		var s = "";
+		var d = ref.read(p_id);						
 		if(d==null) return s;
+		var s = "";
 		for(var i=0;i<d.length;i++) s+= String.fromCharCode(d[i]);
-		return s;		
+		return s;
 	};
 	
 	/**
@@ -266,12 +247,9 @@ var Bundle = function Bundle(p_store_buffer)
 	ref.readDataURL =
 	function(p_id,p_type) 
 	{ 
-		var URL  = window.URL || window.webkitURL;
-		if(URL == null) return "";
 		var d = ref.read(p_id);
-		if(d==null) return "";
-		var blob =  (p_type != null) ? new Blob( [ d ],{ type: mt }) : new Blob([d]);
-		return URL.createObjectURL(blob);
+		if(d==null) return "";		
+		return ref.parseURI(d,p_type);
 	};
 	
 	/**
