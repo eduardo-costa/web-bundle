@@ -42,6 +42,7 @@
     </Reference>
     <Reference Include="Pngcs">
       <HintPath>.\Pngcs.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

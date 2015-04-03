@@ -24,6 +24,7 @@ namespace wb
         static int ERROR_NO_FILES              = 3;
         static int ERROR_OUTPUT_NOT_FOUND      = 4;
         static int ERROR_BUNDLE_LIMIT_EXCEEDED = 5;
+        static int ERROR_DECODE_ERROR          = 6;
 
         static int MAX_WIDTH = 16384;
 
@@ -38,14 +39,29 @@ namespace wb
         static bool is_recursive;
 
         /// <summary>
-        /// Will store raw channel pixels.
+        /// Will read the input png and extract all files.
         /// </summary>
-        static bool store_channels;
-
+        static bool is_decode;
+        
         /// <summary>
         /// Target folder.
         /// </summary>
         static string resource_path;
+
+        /// <summary>
+        /// Hash used to encript the data bytes.
+        /// </summary>
+        static string hash;
+
+        /// <summary>
+        /// Flag that indicates the hash file is valid.
+        /// </summary>
+        static bool has_hash;
+
+        /// <summary>
+        /// Hash iterator.
+        /// </summary>
+        static int hk;
 
         /// <summary>
         /// Header with data information.
@@ -92,8 +108,12 @@ namespace wb
             }
 
             is_verbose     = false;
-            is_recursive   = false;
-            store_channels = false;
+            is_recursive   = false;            
+            is_decode      = false;
+            has_hash = false;
+
+            hash = "";
+            hk = 0;
 
             resource_path = "";
 
@@ -101,11 +121,13 @@ namespace wb
             {
                 switch (args[i])
                 {
-                    case "-h":    is_help = true; break;
+                    case "-?":    is_help = true; break;
                     case "-r":    is_recursive = true; break;
                     case "-i":    if (i < (arglen - 1)) resource_path = args[i + 1]; break;
                     case "-o":    if (i < (arglen - 1)) bundle_path   = args[i + 1]; break;
-                    case "-v":    is_verbose = true; break;                    
+                    case "-v":    is_verbose = true; break;
+                    case "-h": if (i < (arglen - 1)) { hash = args[i + 1]; has_hash = !string.IsNullOrEmpty(hash); } break;
+                    case "-d":    is_decode = true; break;
                 }
             }
 
@@ -113,11 +135,13 @@ namespace wb
 
             if (is_help)
             {
-                Console.WriteLine("  -h outputs help");
+                Console.WriteLine("  -? outputs help");
                 Console.WriteLine("  -r recursive search");
                 Console.WriteLine("  -i input path");
                 Console.WriteLine("  -o output file");
-                Console.WriteLine("  -v enable verbose");
+                Console.WriteLine("  -v enable logging");
+                Console.WriteLine("  -h encript hash");
+                Console.WriteLine("  -d execute as decoder");
             }
 
             if (string.IsNullOrEmpty(resource_path))
@@ -132,7 +156,21 @@ namespace wb
                 return ERROR_OUTPUT_NOT_FOUND;
             }
 
-            LogLine("Encoding [" + resource_path + "] recursive["+is_recursive+"] @ ["+bundle_path+"]");
+            Log(is_decode ? "Decoding " : "Encoding ");
+            Log("[" + resource_path + "] ");
+            if(!is_decode) Log("recursive["+is_recursive+"] ");
+            Log("@ [" + bundle_path + "]\n");
+
+            if (is_decode)
+            {
+                if (!ReadBundle(resource_path, bundle_path))
+                {
+                    LogLine("Error: Failed to decode ["+resource_path+"]");
+                    return ERROR_DECODE_ERROR;
+                }
+                LogLine("Success - All files extracted!");
+                return 0;
+            }
 
             try
             {
@@ -140,7 +178,7 @@ namespace wb
             }
             catch (Exception err)
             {                
-                if(err!=null)LogLine("Error: Wrong path!");
+                if(err!=null)LogLine("Error: Path not found!");
                 return ERROR_NO_FILES;
             }
 
@@ -158,7 +196,7 @@ namespace wb
             bundle_raw_length += bundle_header.Length + 1; //string + 0
             foreach (string f in bundle_files)
             {
-                long len = GetLength(f, store_channels);                
+                long len = GetLength(f);                
                 bundle_raw_length += len;
             }
 
@@ -167,6 +205,7 @@ namespace wb
 
             //Writes the header string in the buffer.
             for (int i = 0; i < bundle_header.Length; i++) buffer[i] = (byte)bundle_header[i];
+
             buffer[bundle_header.Length] = 0;
 
             //Starts at 'header' offset bytes.
@@ -182,54 +221,41 @@ namespace wb
                 
                 byte[] fd  = null;
 
-                switch (ext)
-                {
-                    case "png":
-                        fd = store_channels ? GetBitmapBytes(f) : File.ReadAllBytes(f);
-                        break;
+                fd = File.ReadAllBytes(f);
 
-                    case "jpg":
-                        fd = store_channels ? GetBitmapBytes(f) : File.ReadAllBytes(f);
-                        break;
-
-                    default:
-                        fd = File.ReadAllBytes(f);
-                        break;
-
-                }
                 LogLine("[" + FormatMem(fd.Length) + "]");
-                                
-                //string ss = "";
-                for (int i = 0; i < fd.Length; i++)
-                {
-                    //ss += fd[i] + " ";
-                    buffer[k++] = fd[i];
-                }
                 
-                //File.WriteAllText(f + ".txt", ss);
+                for (int i = 0; i < fd.Length; i++)
+                {                
+                    byte v = fd[i];
+                    if (has_hash)
+                    {
+                        v = (byte)(v ^ ((byte)hash[hk]));
+                        hk = (hk + 1) % hash.Length;
+                    }
+                    buffer[k++] = v;
+                }
                 
             }
 
             int bw = 0;
             int bh = 0;
 
-            LogLine("Generating PNG bundle...");
+            LogLine("Writing PNG bundle...");
 
-            //Writes the buffer data in the Bitmap
-            //GenerateBundle(bundle_path,buffer,MAX_WIDTH,out bw, out bh);
-            GenerateBundleNew(bundle_path, buffer, MAX_WIDTH, out bw, out bh);
+            //Writes the buffer data in the Bitmap            
+            WriteBundle(bundle_path, buffer, MAX_WIDTH, out bw, out bh);
 
             if (bw > MAX_WIDTH)  { LogLine("Bundle exceeded [" + MAX_WIDTH + "] limit!"); return ERROR_BUNDLE_LIMIT_EXCEEDED; }
             if (bh > MAX_WIDTH) { LogLine("Bundle exceeded [" + MAX_WIDTH + "] limit!"); return ERROR_BUNDLE_LIMIT_EXCEEDED; }
 
-            
-            bundle_length = GetLength(bundle_path,store_channels);
+            bundle_length = GetLength(bundle_path);
 
             float compressed = (float)bundle_length;
             float total      = (float)bundle_raw_length;
             int percent      = (int)((1.0f - (compressed / total)) * 100f);
             percent = Math.Max(percent, 0);
-            LogLine("Bundle Generated - ["+bundle_files.Length+" files]["+bw+"x"+bh+"] original[" + FormatMem((int)bundle_raw_length) + "] compressed[" + FormatMem((int)bundle_length) + "] " + percent + "% compressed");
+            LogLine("Success - ["+bundle_files.Length+" files]["+bw+"x"+bh+"] original[" + FormatMem((int)bundle_raw_length) + "] compressed[" + FormatMem((int)bundle_length) + "] " + percent + "% compressed");
 
             return 0;
         }
@@ -247,12 +273,10 @@ namespace wb
             {
                 string f   = p_files[i];                
                 string ext = GetExtension(f);
-                long len   = GetLength(f,store_channels);
-
+                long len   = GetLength(f);
                 List<string> tks = new List<string>(f.Split('\\'));
                 if(tks.Count>1) tks.RemoveAt(0);
                 f = string.Join("\\", tks.ToArray());
-
                 h += f + "," + ext + "," + len + ";";
                 if (i < (p_files.Length - 1)) h += "\n";
             }
@@ -260,14 +284,14 @@ namespace wb
         }
 
         /// <summary>
-        /// 
+        /// Receives the byte buffer with all data and writes the bundle file and saves it with the specified name. Returns the size of the generated PNG.
         /// </summary>
         /// <param name="p_file"></param>
         /// <param name="p_buffer"></param>
         /// <param name="p_max_width"></param>
         /// <param name="p_w"></param>
         /// <param name="p_h"></param>
-        static void GenerateBundleNew(string p_file, byte[] p_buffer, int p_max_width,out int p_w,out int p_h)
+        static void WriteBundle(string p_file, byte[] p_buffer, int p_max_width,out int p_w,out int p_h)
         {
             byte[] d = p_buffer;
             int cc = 3;
@@ -278,17 +302,11 @@ namespace wb
             for (int i = 0; i < p_max_width; i++) if ((i * i) >= pixel_count) { w = i; break; }
             h = w;
             for (int i = h; i > 0; i--) { if ((w * i) < pixel_count) { h = i + 1; break; } }
-
             p_w = w;
             p_h = h;
-
-            ImageInfo imi = new ImageInfo(w, h, 8, false); // 8 bits per channel, no alpha 
-            
-            
-
+            ImageInfo imi = new ImageInfo(w, h, 8, false); // 8 bits per channel, no alpha             
             // open image for writing 
             PngWriter png = FileHelper.CreatePngWriter(p_file, imi, true);
-
             byte[] dr = new byte[w*cc];
             int k = 0;
             for (int i = 0; i < h; i++)
@@ -307,134 +325,101 @@ namespace wb
                 }
                 png.WriteRowByte(dr, i);
             }
-
             png.CompressionStrategy = EDeflateCompressStrategy.Filtered;
             png.CompLevel = 9;
-
             png.End();
         }
 
         /// <summary>
-        /// Generates the bundle bitmap.
+        /// Reads and extract all data from the bundle.
         /// </summary>
-        /// <param name="p_buffer"></param>
-        /// <param name="p_max_width"></param>
-        static void GenerateBundle(string p_name,byte[] p_buffer, int p_max_width, out int p_w, out int p_h)
+        /// <param name="p_file"></param>
+        static bool ReadBundle(string p_file,string p_target)
         {
-            
-            byte[] d = p_buffer;
+            string[] tks;
+            tks = p_file.Split('\\');
+            string file_name = tks.Length <= 0 ? "" : tks[tks.Length - 1];            
+            if (string.IsNullOrEmpty(file_name)) return false;
+            tks = file_name.Split('.');
+            file_name = tks.Length <= 0 ? "" : tks[0];
+            if (string.IsNullOrEmpty(file_name)) return false;
 
-            //PixelFormat fmt = PixelFormat.Format24bppRgb;
+            if(!File.Exists(p_file)) return false;
 
-            //int cc = fmt == PixelFormat.Format32bppArgb ? 4 : 3;
-            
-            int cc = 3;
+            FileStream fs = File.OpenRead(p_file);
 
-            //Detects the PNG ideal width and height based on byte count.
-            int pixel_count = d.Length / cc;
-            int w = 1;
-            int h = 1;
-            for (int i = 0; i < p_max_width; i++) if ((i * i) >= pixel_count) { w = i; break; }
-            h = w;
-            for (int i = h; i > 0; i--) { if ((w * i) < pixel_count) { h = i + 1; break; } }
-
-            p_w = w;
-            p_h = h;
-
-            //int k = 0;
-
-            /*
-            //Create the bitmap
-            Bitmap png = new Bitmap(w, h, fmt);
-
-            //Extract the pixel buffer.
-            Rectangle r = new Rectangle(0, 0, w, h);
-            BitmapData bd = png.LockBits(r, ImageLockMode.ReadWrite, png.PixelFormat);
-
-            IntPtr ptr        = bd.Scan0;
-            int byte_count    = Math.Abs(bd.Stride) * bd.Height;
-            byte[] png_buffer = new byte[byte_count];
-
-            // Copy the RGB values into the array.
-            Marshal.Copy(ptr, png_buffer, 0, byte_count);
-
-            //BGR
-            //Watch out for the stride+padding!!
-            for (int i = 0; i < pixel_count; i++)
-            {   
-                int px = i % w;
-                int py = (int)(i / w);
-                int p  = (px*cc) + (py * bd.Stride);
-
-                png_buffer[p+2] = k < d.Length ? d[k++] : (byte)' ';
-                png_buffer[p+1] = k < d.Length ? d[k++] : (byte)' ';
-                png_buffer[p  ] = k < d.Length ? d[k++] : (byte)' ';
-                if (cc >= 4)
-                png_buffer[p+3] = k < d.Length ? d[k++] : (byte)255;
-            }
-
-            Marshal.Copy(png_buffer, 0, ptr, byte_count);
-
-            png.UnlockBits(bd);
-            
-            
-            //Fill the data                
-            for (int i = 0; i < pixel_count; i++)
-            {   
-                int px = i % w;
-                int py = (int)(i / w);
-                byte cr = k < d.Length ? (byte)d[k++] : (byte)255;
-                byte cg = k < d.Length ? (byte)d[k++] : (byte)255;
-                byte cb = k < d.Length ? (byte)d[k++] : (byte)255;
-                byte ca = 
-                    //(cc>=4) ? (k < d.Length ? (byte)d[k++] : (byte)' ') : 
-                    (byte)255;
-                png.SetPixel(px, py, Color.FromArgb(ca, cr, cg, cb));
-            }
             
 
-            if (w < p_max_width)
-            {
-                png.Save(bundle_path, System.Drawing.Imaging.ImageFormat.Bmp);
-                png.Dispose();
-            }
-            //*/
-        }
-
-        /// <summary>
-        /// Returns the raw byte data of the informed image.
-        /// </summary>
-        /// <param name="p_path"></param>
-        /// <returns></returns>
-        static byte[] GetBitmapBytes(string p_path)
-        {
-            /*
-            Bitmap img = (Bitmap) Bitmap.FromFile(p_path);
-            int cc = 4;
-            switch(img.PixelFormat)
-            {
-                case PixelFormat.Alpha:             cc = 1; break;
-                case PixelFormat.Format24bppRgb:    cc = 3; break;
-                case PixelFormat.Format32bppArgb:   cc = 4; break;
-                default: return new byte[1]{0};
-            }
-
-            Log("   w["+img.Width+"] h["+img.Height+"] channels["+cc+"]");
-            
-            byte[] buff = new byte[img.Width * img.Height * cc];
+            PngReader png = new PngReader(fs);
+            int cc = png.ImgInfo.Alpha ? 4 : 3;            
+            int w = png.ImgInfo.BytesPerRow / cc;
+            int h = png.ImgInfo.Rows;
+            byte[] buffer = new byte[w * h * cc];
             int k = 0;
-            for(int i=0;i<img.Height;i++)
-            for (int j = 0; j < img.Width; j++)
+            int[][] im = png.ReadRowsInt().Scanlines;
+            for (int i = 0; i < im.Length; i++)
             {
-                Color c = img.GetPixel(j, i);
-                buff[k++] = c.R;
-                buff[k++] = c.G;
-                buff[k++] = c.B;
-                if (cc >= 4) buff[k++] = c.A;
-            }            
-            return buff;
-            //*/
-            return null;
+                int[] row = im[i];
+                for (int j = 0; j < row.Length; j++)
+                {   
+                    buffer[k++] = (byte)row[j];                    
+                }
+            }
+            png.End();
+            fs.Close();
+
+            string header = "";
+
+            k=0;
+
+            while (buffer[k] != 0)
+            {
+                if (k >= buffer.Length) return false;
+                header += (char)buffer[k];
+                k++;
+            }
+
+            k++;
+
+            header = header.Replace("\n", "");
+
+            tks = header.Split(';');
+
+            List<string> dir = new List<string>();
+
+            for (int i = 0; i < tks.Length; i++)
+            {
+                if (string.IsNullOrEmpty(tks[i])) continue;
+                string[] hd = tks[i].Split(',');
+                string path    = p_target+"\\"+hd[0];
+                int byte_count = int.Parse(hd[2]);
+
+                dir.Clear();
+                dir.AddRange(path.Split('\\'));
+                dir.RemoveAt(dir.Count - 1);
+                string target_dir = string.Join("\\", dir.ToArray());
+                if (!string.IsNullOrEmpty(target_dir)) Directory.CreateDirectory(target_dir);
+
+                byte[] file_buffer = new byte[byte_count];
+
+                for (int j = 0; j < byte_count; j++)
+                {
+                    byte v = buffer[k++];
+                    if (has_hash)
+                    {
+                        v = (byte)(v ^ ((byte)hash[hk]));
+                        hk = (hk + 1) % hash.Length;
+                    }
+                    file_buffer[j] = v;
+                }
+
+                LogLine("unpacking ["+path+"]["+FormatMem(byte_count)+"]");
+
+                File.WriteAllBytes(path, file_buffer);
+
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -462,29 +447,19 @@ namespace wb
         /// </summary>
         /// <param name="p_file"></param>
         /// <returns></returns>
-        static long GetLength(string p_file,bool read_channels) 
+        static long GetLength(string p_file) 
         {
-            string ext = GetExtension(p_file);
-            if (!read_channels) ext = "";
-            Bitmap b;
-            int cc;
             long len = 0;
-            switch (ext)
-            {
-                case "png": b = (Bitmap)Bitmap.FromFile(p_file); cc = GetChannels(b); len = b.Width * b.Height * cc; b.Dispose(); break;
-                case "jpg": b = (Bitmap)Bitmap.FromFile(p_file); cc = GetChannels(b); len = b.Width * b.Height * cc; b.Dispose(); break;
-                default:
-                FileStream fs = File.OpenRead(p_file);
-                len = fs.Length; 
-                fs.Close();
-                break;
-            }
-            return len;
+            FileStream fs = File.OpenRead(p_file);
+            len = fs.Length;
+            fs.Close();
+            return len;        
         }
 
-
-        static int GetChannels(Bitmap b) { return 3; /*b.PixelFormat == PixelFormat.Alpha ? 1 : (b.PixelFormat == PixelFormat.Format24bppRgb ? 3 : 4);*/ }
-
+        /// <summary>
+        /// Log helper
+        /// </summary>
+        /// <param name="msg"></param>
         static void LogLine(string msg) { if (is_verbose) Console.WriteLine(msg); }
         static void Log(string msg) { if (is_verbose) Console.Write(msg); }
     }

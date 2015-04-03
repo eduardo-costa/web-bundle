@@ -261,6 +261,20 @@ var Bundle = function Bundle(p_store_buffer)
 	function(p_id,p_callback) { return ref.parseImg(ref.read(p_id),p_callback); };
 	
 	/**
+	Convert all bytes to a Data URI format.
+	//*/
+	ref.readDataURL =
+	function(p_id,p_type) 
+	{ 
+		var URL  = window.URL || window.webkitURL;
+		if(URL == null) return "";
+		var d = ref.read(p_id);
+		if(d==null) return "";
+		var blob =  (p_type != null) ? new Blob( [ d ],{ type: mt }) : new Blob([d]);
+		return URL.createObjectURL(blob);
+	};
+	
+	/**
 	Reads the specified data as a image pixel buffer.
 	//*/
 	ref.readRGBA = function(p_id,p_callback,p_type) { ref.parsePixels(ref.read(p_id),p_callback,p_type); };
