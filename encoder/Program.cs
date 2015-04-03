@@ -8,6 +8,8 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using Hjg.Pngcs;
 using Hjg.Pngcs.Zlib;
+using System.Threading;
+using System.Reflection;
 
 
 namespace wb
@@ -57,7 +59,7 @@ namespace wb
         /// Flag that indicates the hash file is valid.
         /// </summary>
         static bool has_hash;
-
+        
         /// <summary>
         /// Hash iterator.
         /// </summary>
@@ -99,6 +101,7 @@ namespace wb
         /// <param name="args"></param>
         static int Main(string[] args)
         {
+            
             int arglen       = args.Length;
             bool is_help = false;
             if (arglen <= 1) 
@@ -348,8 +351,6 @@ namespace wb
 
             FileStream fs = File.OpenRead(p_file);
 
-            
-
             PngReader png = new PngReader(fs);
             int cc = png.ImgInfo.Alpha ? 4 : 3;            
             int w = png.ImgInfo.BytesPerRow / cc;
@@ -462,5 +463,6 @@ namespace wb
         /// <param name="msg"></param>
         static void LogLine(string msg) { if (is_verbose) Console.WriteLine(msg); }
         static void Log(string msg) { if (is_verbose) Console.Write(msg); }
+
     }
 }
