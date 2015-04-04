@@ -37,7 +37,7 @@ This PNG contains the following files:
 * Creates a bundle instance `var b = new Bundle();`
 * Load your `wb` file `b.load("data/output.wb",function(bundle,progress){ /*...*/ });` and keep track of the progress callback. 
 * When the callback `progress` reaches `1.0` and `bundle` is a valid instance you are ready to use all your data.
-* Check the `read...()` methods to know which data type can be manipulated.
+* Check the `read[Text|JSON|Img|...]()` methods to know which data type can be manipulated.
 
 ## TODO
 * Use `nodejs` for the tool and make it platform independent and/or a webservice.
