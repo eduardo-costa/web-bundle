@@ -15,7 +15,7 @@
 	console.log(b);
 	
 	//Loads an example bundle from the data folder.
-	b.load("data/resource.wb",function(d,p) 
+	b.load("data/resource-pass.wb",function(d,p) 
 	{
 		//check load progress.
 		console.log(p);
@@ -41,7 +41,7 @@
 			//loads a XML string.
 			console.log(d.readText("xml.dae").substr(0,500));			
 		}		
-	});	
+	},"12345");	
 	</script>
 </body>
 </html>

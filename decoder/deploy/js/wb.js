@@ -89,7 +89,7 @@ var Bundle = function Bundle(p_store_buffer)
 	/**
 	Parses an ArrayBuffer of Bundle data.
 	//*/
-	ref.parse = function(p_buffer,p_callback)
+	ref.parse = function(p_buffer,p_callback,p_pass)
 	{
 		var img = 
 		ref.parsePixels(p_buffer,function(p_pixels,p_w,p_h,p_channels)
@@ -98,6 +98,8 @@ var Bundle = function Bundle(p_store_buffer)
 			var h  = "";			
 			var pc = p_w * p_h;
 			var bb = new Uint8Array(pc * 3);
+			
+			var pass = p_pass==null ? "" : p_pass;
 			
 			if(ref.storeBuffer) ref.buffer = bb;
 			
@@ -114,8 +116,27 @@ var Bundle = function Bundle(p_store_buffer)
 			while(k < bb.length)
 			{
 				//stops on string \0 char
-				if(bb[k]<5)   { k++; break; } //was testing 0 but possibly the encoding messed up the value
+				if(bb[k]<5)   { break; } //was testing 0 but possibly the encoding messed up the value
 				h += String.fromCharCode(bb[k++]);
+			}
+			
+			//ignore end string char
+			k++;
+			
+			//password char interator
+			var pk = 0;
+				
+			//if the bundle was encripted we need to undo the encription			
+			if(pass != "")
+			{
+				for(var j=k;j<bb.length;j++)
+				{
+					var v  = bb[j];
+					var pb = pass.charCodeAt(pk);			
+					v = pb ^ v; //simple XOR encription
+					bb[j] = v;
+					pk = (pk+1)%pass.length;
+				}
 			}
 			
 			//init entries list
@@ -142,6 +163,7 @@ var Bundle = function Bundle(p_store_buffer)
 			//for each entry extract the Uint8Array sector from the bundle buffer.
 			var el = ref.entries;		
 			
+			
 			for(var i=0;i<el.length;i++)
 			{
 				var hd    = el[i];				
@@ -157,7 +179,7 @@ var Bundle = function Bundle(p_store_buffer)
 	Loads a bundle file and parses its content storing all ArrayBuffers into the correct places.
 	//*/
 	ref.load =
-	function(p_url,p_callback)
+	function(p_url,p_callback,p_pass)
 	{
 		ref.url = p_url;
 		var ld = new XMLHttpRequest();		
@@ -175,7 +197,7 @@ var Bundle = function Bundle(p_store_buffer)
 			ref.parse(ld.response,function(p_bundle)
 			{
 				if(p_callback != null) p_callback(p_bundle,1.0);
-			});
+			},p_pass);
 		};
 		ld.send();
 	};
