@@ -43,6 +43,7 @@ This PNG contains the following files:
 * Find the `wb.exe` tool in `encoder\bin\Release`
 * In the command line call `wb.exe -d -v -i output.wb -o target_folder`
 * If data is encrypted use `-h some-password`
+* After decompression the data will be available at `target_folder/`
 
 ## TODO
 * Use `nodejs` for the tool and make it platform independent and/or a webservice.
