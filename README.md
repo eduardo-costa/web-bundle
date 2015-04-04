@@ -28,16 +28,22 @@ This PNG contains the following files:
 ## Compression
 * Find the `wb.exe` tool in `encoder\bin\Release`
 * In the command line call `wb.exe -v -i root_folder -o output.wb`
-* Data can be encripted using `-h some-password`
+* Data can be encrypted using `-h some-password`
 * After execution the compressed data will be stored in the `output.wb` file.
 * Move this file to your page desired folder.
 
-## Decompression
+## Decompression [Javascript]
 * Add `js/wb.js` to your page.
 * Creates a bundle instance `var b = new Bundle();`
 * Load your `wb` file `b.load("data/output.wb",function(bundle,progress){ /*...*/ });` and keep track of the progress callback. 
 * When the callback `progress` reaches `1.0` and `bundle` is a valid instance you are ready to use all your data.
 * Check the `read[Text|JSON|Img|...]()` methods to know which data type can be manipulated.
 
+## Decompression [CLI]
+* Find the `wb.exe` tool in `encoder\bin\Release`
+* In the command line call `wb.exe -d -v -i output.wb -o target_folder`
+* If data is encrypted use `-h some-password`
+
 ## TODO
 * Use `nodejs` for the tool and make it platform independent and/or a webservice.
+* Create Haxe bindings.
