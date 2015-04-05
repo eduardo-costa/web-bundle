@@ -123,10 +123,10 @@ var Bundle = function Bundle(p_store_buffer)
 			//ignore end string char
 			k++;
 			
-			//password char interator
+			//password char iterator
 			var pk = 0;
 				
-			//if the bundle was encripted we need to undo the encription			
+			//if the bundle was encripted we need to undo the encryption
 			if(pass != "")
 			{
 				for(var j=k;j<bb.length;j++)

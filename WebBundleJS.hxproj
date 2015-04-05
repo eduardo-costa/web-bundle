@@ -4,22 +4,42 @@
   <output>
     <movie outputType="CustomBuild" />
     <movie input="" />
-    <movie path="" />
+    <movie path="deploy\haxe\app.js" />
     <movie fps="0" />
     <movie width="0" />
     <movie height="0" />
     <movie version="1" />
     <movie minorVersion="0" />
-    <movie platform="Default" />
-    <movie background="#000000" />
+    <movie platform="JavaScript" />
+    <movie background="#FFFFFF" />
+    <movie preferredSDK="Haxe 3.2.0;3.2.0;" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <!-- example: <class path="..." /> -->
+    <class path="." />
   </classpaths>
+  <!-- Build options -->
+  <build>
+    <option directives="" />
+    <option flashStrict="False" />
+    <option noInlineOnDebug="False" />
+    <option mainClass="" />
+    <option enabledebug="False" />
+    <option additional="" />
+  </build>
+  <!-- haxelib libraries -->
+  <haxelib>
+    <!-- example: <library name="..." /> -->
+  </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <!-- example: <compile path="..." /> -->
+    <compile path="src\Main.hx" />
+    <compile path="src\MainHTML.hx" />
+    <compile path="source\Dungeon00.hx" />
+    <compile path="source\examples\dungeon\DungeonApp.hx" />
+    <compile path="source\examples\curves\Main.hx" />
+    <compile path="source\Main.hx" />
+    <compile path="MainHTML.hx" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
@@ -33,7 +53,7 @@
   <options>
     <option showHiddenPaths="False" />
     <option testMovie="Webserver" />
-    <option testMovieCommand="deploy/index.html" />
+    <option testMovieCommand="deploy\index-js.html" />
   </options>
   <!-- Plugin storage -->
   <storage />
