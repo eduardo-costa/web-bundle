@@ -300,11 +300,8 @@ namespace wb
             int cc = 3;
             //Detects the PNG ideal width and height based on byte count.
             int pixel_count = d.Length / cc;
-            int w = 1;
-            int h = 1;
-            for (int i = 0; i < p_max_width; i++) if ((i * i) >= pixel_count) { w = i; break; }
-            h = w;
-            for (int i = h; i > 0; i--) { if ((w * i) < pixel_count) { h = i + 1; break; } }
+            int w = Convert.ToInt32(Math.Sqrt(Convert.ToDouble(pixel_count)));
+            int h = w;
             p_w = w;
             p_h = h;
             ImageInfo imi = new ImageInfo(w, h, 8, false); // 8 bits per channel, no alpha             
