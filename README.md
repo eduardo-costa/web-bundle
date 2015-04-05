@@ -33,7 +33,7 @@ This PNG contains the following files:
 * Move this file to your page desired folder.
 
 ## Decompression [Javascript]
-* Add `deploy/js/wb.js` or `deploy/js/wb.min.js`  to your page. 
+* Add the scripts `deploy/js/wb.js` or `deploy/js/wb.min.js`  to your page. 
 ```
 var b = new Bundle();
 b.load("data/output.wb",function(bundle,progress)
@@ -51,6 +51,9 @@ b.load("data/output.wb",function(bundle,progress)
 ## Decompression [Haxe]
 * Make sure `<script src='js/wb.js'/>` exists in your page.
 * Make sure the `web-bundle` library is installed and linked in your project.
+  * Use `haxelib` to install the library.
+  * `haxelib git web-bundle https://github.com/haxorplatform/web-bundle.git 1.0`
+	  
 ```
 import js.Bundle;
 
