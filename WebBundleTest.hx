@@ -8,7 +8,7 @@ import js.html.Image;
  * 
  * @author Eduardo Pons - eduardo@thelaborat.org
  */
-class Main
+class WebBundleTest
 {
 
 	/**

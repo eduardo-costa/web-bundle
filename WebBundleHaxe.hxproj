@@ -23,7 +23,7 @@
     <option directives="" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
-    <option mainClass="Main" />
+    <option mainClass="WebBundleTest" />
     <option enabledebug="False" />
     <option additional="" />
   </build>
@@ -41,6 +41,7 @@
     <compile path="source\Main.hx" />
     <compile path="MainHTML.hx" />
     <compile path="Main.hx" />
+    <compile path="WebBundleTest.hx" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>

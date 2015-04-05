@@ -16,7 +16,7 @@ namespace wb
 {
     class Program
     {
-        static string VERSION = "1.0.0";
+        static string VERSION = "1.0";
 
         /// <summary>
         /// Error codes.
@@ -297,17 +297,23 @@ namespace wb
         static void WriteBundle(string p_file, byte[] p_buffer, int p_max_width,out int p_w,out int p_h)
         {
             byte[] d = p_buffer;
+
+            //expected channel count
             int cc = 3;
-            //Detects the PNG ideal width and height based on byte count.
-            int pixel_count = d.Length / cc;
+
+            //minimum pixel count needed to contain buffer.Length
+            int pixel_count = (int)Math.Ceiling((double)d.Length / (double)cc);
+            
             int w = 1;
             int h = 1;
-            for (int i = 0; i < p_max_width; i++) if ((i * i) >= pixel_count) { w = i; break; }
-            h = w;
-            for (int i = h; i > 0; i--) { if ((w * i) < pixel_count) { h = i + 1; break; } }
-            p_w = w;
-            p_h = h;
-            ImageInfo imi = new ImageInfo(w, h, 8, false); // 8 bits per channel, no alpha             
+            
+            //finds the minimum 'width' and 'height' that contains 'pixel_count'
+            p_w = w = (int)Math.Ceiling(Math.Sqrt((double)pixel_count));
+            p_h = h = (int)Math.Ceiling(((double)pixel_count) / ((double)w));
+
+            // 8 bits per channel, no alpha        
+            ImageInfo imi = new ImageInfo(w, h, 8, false);      
+            
             // open image for writing 
             PngWriter png = FileHelper.CreatePngWriter(p_file, imi, true);
             byte[] dr = new byte[w*cc];
@@ -322,13 +328,12 @@ namespace wb
                     byte cg = (k >= d.Length) ? ((byte)255) : d[k++];
                     byte cb = (k >= d.Length) ? ((byte)255) : d[k++];
                     int p = j*3;
-                    dr[p]   = cr;
+                    dr[p  ] = cr;
                     dr[p+1] = cg;
                     dr[p+2] = cb;
                 }
                 png.WriteRowByte(dr, i);
-            }
-            png.CompressionStrategy = EDeflateCompressStrategy.Filtered;
+            }            
             png.CompLevel = 9;
             png.End();
         }

@@ -9,8 +9,8 @@ HxOverrides.substr = function(s,pos,len) {
 	} else if(len < 0) len = s.length + len - pos;
 	return s.substr(pos,len);
 };
-var Main = function() { };
-Main.main = function() {
+var WebBundleTest = function() { };
+WebBundleTest.main = function() {
 	console.log("WebBundle> Haxe Example");
 	var b = new Bundle();
 	b.load("data/resource-pass.wb",function(d,p) {
@@ -31,5 +31,5 @@ Main.main = function() {
 		}
 	},"12345");
 };
-Main.main();
+WebBundleTest.main();
 })(typeof console != "undefined" ? console : {log:function(){}});
