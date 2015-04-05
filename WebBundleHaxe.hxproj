@@ -54,7 +54,7 @@
   <options>
     <option showHiddenPaths="False" />
     <option testMovie="Webserver" />
-    <option testMovieCommand="deploy\haxe\index.html" />
+    <option testMovieCommand="deploy\index-haxe.html" />
   </options>
   <!-- Plugin storage -->
   <storage />
