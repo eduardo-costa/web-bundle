@@ -1,4 +1,3 @@
 module.exports = {
-  Encoder: require('./Encoder'),
-  Decoder: require('./Decoder')
+  Bundle: require('./Bundle'),
 };

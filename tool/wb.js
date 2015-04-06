@@ -13,20 +13,28 @@ var argv = require('yargs')
   .command('decode', 'Decode files from a bundle')
   .example('$0 decode foo.wb', 'Extract files from foo.wb, writing them to the current directory')
   .example('$0 decode -o /some/dir -x data.json foo.wb', 'Extract data.json from foo.wb and write it to /some/dir')
+  .command('encode', 'Encode files into a bundle')
+  .example('$0 encode foo.json bar.png', 'Encode foo.json and bar.png end store them in data.wb.png')
+  .example('$0 encode foo.json bar.png -o my-bundle.wb', 'Encode foo.json and bar.png and store them in my-bundle.wb')
+  .example('$0 encode -a foo.json -o my-bundle.wb', 'Add foo.json the existing bundle my-bundle.wb')
   .options('x', {
     alias: 'extract',
     describe: 'File to extract from a decoded bundle'
   })
   .options('o', {
     alias: 'output',
-    describe: 'Output location for encoded bundle or extracted files',
-    default: './'
+    describe: 'Output location for encoded bundle or extracted files. Defaults to ./ for decode and ./data.wb.png for encode'
+  })
+  .options('a', {
+    alias: 'add',
+    describe: 'Add files to an existing bundle, instead of creating a new one',
+    type: 'boolean'
   })
   .help('h')
   .alias('h', 'help')
   .check(function(argv) {
     var command = argv._ && argv._[0];
-    return command === 'ls' || command === 'decode';
+    return command === 'ls' || command === 'decode' || command === 'encode';
   })
   .argv;
 
@@ -39,12 +47,18 @@ switch(command) {
     break;
 
   case 'decode':
+    argv.output = argv.output || './';
     decode(files, argv);
+    break;
+
+  case 'encode':
+    argv.output = argv.output || './data.wb.png';
+    encode(files, argv);
     break;
 }
 
 function ls(files) {
-  var decoder = new wb.Decoder();
+  var decoder = new wb.Bundle();
   async.each(files, decoder.load.bind(decoder), function(err) {
     if (err) throw err;
 
@@ -56,7 +70,7 @@ function ls(files) {
 }
 
 function decode(files, options) {
-  var decoder = new wb.Decoder();
+  var decoder = new wb.Bundle();
   async.each(files, decoder.load.bind(decoder), function(err) {
     if (err) throw err;
 
@@ -95,4 +109,27 @@ function decode(files, options) {
       if (err) throw err;
     });
   });
+}
+
+function encode(files, options) {
+  getBundle(options.output, options.add, function(bundle) {
+    async.each(files, bundle.addFile.bind(bundle), function(err) {
+      if (err) throw err;
+      bundle.write(options.output, function(err, length, original) {
+        if (err) throw err;
+        console.log('Wrote %d bytes to %s. Original %d, compressed %s%', length, options.output, original, (100 * (original - length) / original).toFixed(2));
+      });
+    });
+  });
+}
+
+function getBundle(file, add, cb) {
+  var bundle = new wb.Bundle();
+  if (add) {
+    bundle.load(file, function() {
+      cb(bundle);
+    });
+  } else {
+    cb(bundle);
+  }
 }
