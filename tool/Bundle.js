@@ -3,7 +3,13 @@ var fs = require('fs'),
   PNG = require('png-js'),
   PngEncoder = require('png').Png;
 
-function Bundle() {
+function Bundle(key) {
+  if (key) {
+    if (typeof key !== 'string') {
+      throw new TypeError('key should be a string, not ' + typeof key);
+    }
+    this.key = new Buffer(key);
+  }
   this.data = {};
 }
 
@@ -31,6 +37,8 @@ Bundle.prototype.load = function(filename, cb) {
 // Decode a pixel buffer
 Bundle.prototype.decode = function(buffer) {
   var files, file, i;
+
+  if (this.key) xor(buffer, this.key);
 
   // Read headers
   i = 0;
@@ -131,6 +139,7 @@ Bundle.prototype.toBuffer = function() {
     file.data.copy(buffer, file.start);
   }
 
+  if (this.key) xor(buffer, this.key);
   return buffer;
 };
 
@@ -171,6 +180,12 @@ function stripAlpha(src) {
   }
 
   return dest;
+}
+
+function xor(buffer, key) {
+  for (var i = 0; i < buffer.length; i++) {
+    buffer[i] = buffer[i] ^ key[i % key.length];
+  }
 }
 
 module.exports = Bundle;

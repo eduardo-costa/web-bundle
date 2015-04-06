@@ -12,9 +12,11 @@ var argv = require('yargs')
   .example('$0 ls foo.wb', 'List the files stored in foo.wb')
   .command('decode', 'Decode files from a bundle')
   .example('$0 decode foo.wb', 'Extract files from foo.wb, writing them to the current directory')
+  .example('$0 decode foo.wb -h keyboardcat', 'Extract files from foo.wb, decrypting them with the pass "keyboardcat"')
   .example('$0 decode -o /some/dir -x data.json foo.wb', 'Extract data.json from foo.wb and write it to /some/dir')
   .command('encode', 'Encode files into a bundle')
   .example('$0 encode foo.json bar.png', 'Encode foo.json and bar.png end store them in data.wb.png')
+  .example('$0 encode foo.json -h keyboardcat', 'Encode foo.json, encrypting the bundle with the pass "keyboardcat"')
   .example('$0 encode foo.json bar.png -o my-bundle.wb', 'Encode foo.json and bar.png and store them in my-bundle.wb')
   .example('$0 encode -a foo.json -o my-bundle.wb', 'Add foo.json the existing bundle my-bundle.wb')
   .options('x', {
@@ -30,6 +32,10 @@ var argv = require('yargs')
     describe: 'Add files to an existing bundle, instead of creating a new one',
     type: 'boolean'
   })
+  .options('k', {
+    alias: 'key',
+    describe: 'XOR the contents of the bundle using the key provided, providing simple encryption'
+  })
   .help('h')
   .alias('h', 'help')
   .check(function(argv) {
@@ -43,7 +49,7 @@ var command = argv._.shift(),
 
 switch(command) {
   case 'ls':
-    ls(files);
+    ls(files, argv);
     break;
 
   case 'decode':
@@ -57,8 +63,8 @@ switch(command) {
     break;
 }
 
-function ls(files) {
-  var decoder = new wb.Bundle();
+function ls(files, options) {
+  var decoder = new wb.Bundle(options.key);
   async.each(files, decoder.load.bind(decoder), function(err) {
     if (err) throw err;
 
@@ -70,7 +76,7 @@ function ls(files) {
 }
 
 function decode(files, options) {
-  var decoder = new wb.Bundle();
+  var decoder = new wb.Bundle(options.key);
   async.each(files, decoder.load.bind(decoder), function(err) {
     if (err) throw err;
 
@@ -112,7 +118,7 @@ function decode(files, options) {
 }
 
 function encode(files, options) {
-  getBundle(options.output, options.add, function(bundle) {
+  getBundle(options.output, options.add, options.key, function(bundle) {
     async.each(files, bundle.addFile.bind(bundle), function(err) {
       if (err) throw err;
       bundle.write(options.output, function(err, length, original) {
@@ -123,8 +129,8 @@ function encode(files, options) {
   });
 }
 
-function getBundle(file, add, cb) {
-  var bundle = new wb.Bundle();
+function getBundle(file, add, key, cb) {
+  var bundle = new wb.Bundle(key);
   if (add) {
     bundle.load(file, function() {
       cb(bundle);
