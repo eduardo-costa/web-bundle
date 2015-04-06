@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/haxorplatform/web-bundle.git"
   },
-  "author": "Eduardo Dias da Costa",
+  "author": "Eduardo Dias da Costa  <eduardo@thelaborat.org> https://github.com/eduardo-costa",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/haxorplatform/web-bundle/issues"
