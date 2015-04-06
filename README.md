@@ -15,7 +15,7 @@ This PNG contains the following files:
 * data.json
 * portrait.png  
 
-![packed bundle](https://dl.dropboxusercontent.com/u/20655747/resource.png)
+![packed bundle](test/data.wb.png)
 
 # Why Bundle stuff ?
 
@@ -25,16 +25,32 @@ This PNG contains the following files:
 * Games can greatly benefit of the compression and data packing
 * No need to create and manage your own pack data type
 
-## Compression
-* Find the `wb.exe` tool in `tool\bin\Release`
-* In the command line call `wb.exe -v -i root_folder -o output.wb`
-* Data can be encrypted using `-h some-password`
-* After execution the compressed data will be stored in the `output.wb` file.
-* Move this file to your page desired folder.
+## Compression [CLI]
+* Install the `wb` tool with `$ npm install web-bundle`, or find it in `tool/wb.js`
+* In the command line, run `$ wb encode -o my-bundle.wb foo.json bar.png`
+* After running, `foo.json` and `bar.png` will be stored in `my-bundle.png`
+* Use `--output` or `-o` to choose the output location for the bundle
+* Use `--add` or `a` to add files to an existing bundle instead of creating a new one
+* See `wb --help` for more
 
-## Decompression [Javascript]
-* Add the scripts `deploy/js/wb.js` or `deploy/js/wb.min.js`  to your page. 
+## Compression [Node.JS]
+* Install web-bundle with `npm install --save web-bundle`
+```javascript
+var wb = require('web-bundle');
+
+var bundle = new wb.Bundle();
+bundle.addFile('foo.png', function(err) {
+  // some/dir/foo.png has been added to the bundle
+  
+  bundle.write('bundle.wb', function(err) {
+    // Bundle written
+  });
+});
 ```
+
+## Decompression [JavaScript, browser]
+* Add the scripts `deploy/js/wb.js` or `deploy/js/wb.min.js`  to your page. 
+```javascript
 var b = new Bundle();
 b.load("data/output.wb",function(bundle,progress)
 {
@@ -54,7 +70,7 @@ b.load("data/output.wb",function(bundle,progress)
   * Use `haxelib` to install the library.
   * `haxelib git web-bundle https://github.com/haxorplatform/web-bundle.git 1.0`
 	  
-```
+```haxe
 import js.Bundle;
 
 var b : Bundle = new Bundle();
@@ -70,12 +86,24 @@ b.load("data/output.wb",function(bundle:Bundle,progress:Float)
 },[password]);
 ```
 
+## Decompression [Node.JS]
+* Install with `$ npm install --save web-bundle`
+```javascript
+var wb = require('web-bundle');
+
+var bundle = new wb.Bundle();
+bundle.load('my-bundle.wb', function(err) {
+  // Bundle loaded
+  bundle.read('foo.json') // -> Buffer
+  bundle.readString('foo.json') // -> string
+  bundle.readJSON('foo.json') // -> Object
+});
+```
+
 ## Decompression [CLI]
-* Find the `wb.exe` tool in `tool\bin\Release`
-* In the command line call `wb.exe -d -v -i output.wb -o target_folder`
-* If data is encrypted use `-h some-password`
-* After decompression the data will be available at `target_folder/`
-
-## TODO
-* Use `nodejs` for the tool and make it platform independent and/or a webservice.
-
+* Install the `wb` tool with `$ npm install web-bundle`, or find it in `tool/wb.js`
+* To see the contents of a bundle, run `$ wb ls my-bundle.wb`
+* To extract all files, use `$ wb decode my-bundle.wb`
+* Specify an output location with `--output` or `-o`: `$ wb decode my-bundle.wb --output some/dir`
+* Extract a single file with `--extract` or `-e`: `$ wb decode my-bundle.wb --extract foo.png`
+* See `$ wb --help` for more

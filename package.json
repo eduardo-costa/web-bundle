@@ -1,0 +1,28 @@
+{
+  "name": "web-bundle",
+  "version": "1.0.0",
+  "description": "Tool to pack binary files into a PNG image.",
+  "main": "tool/index.js",
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haxorplatform/web-bundle.git"
+  },
+  "author": "Haxor Platform",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/haxorplatform/web-bundle/issues"
+  },
+  "homepage": "https://github.com/haxorplatform/web-bundle",
+  "bin": {
+    "wb": "tool/wb.js"
+  },
+  "dependencies": {
+    "async": "^0.9.0",
+    "png": "^3.0.3",
+    "png-js": "^0.1.1",
+    "yargs": "^3.7.0"
+  }
+}
