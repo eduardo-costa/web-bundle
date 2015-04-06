@@ -15,7 +15,7 @@ This PNG contains the following files:
 * data.json
 * portrait.png  
 
-![packed bundle](https://github.com/haxorplatform/web-bundle/blob/1.0/test/data.wb.png)
+![packed bundle](https://raw.githubusercontent.com/haxorplatform/web-bundle/1.0/test/data.wb.png)
 
 # Why Bundle stuff ?
 
