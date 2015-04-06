@@ -1,6 +1,6 @@
 {
   "name": "web-bundle",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Tool to pack binary files into a PNG image.",
   "main": "tool/index.js",
   "scripts": {
