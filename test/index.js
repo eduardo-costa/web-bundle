@@ -18,14 +18,20 @@ async.series([
     var encoder = new wb.Bundle();
     async.each(['test/data.json', 'test/portrait.png', 'test/xml.dae'], encoder.addFile.bind(encoder), function(err) {
       if (err) return cb(err);
-      var decoder = new wb.Bundle();
-      decoder.decode(encoder.toBuffer());
-      assert.deepEqual(fs.readFileSync('test/data.json'), decoder.read('test/data.json'));
-      assert.deepEqual(fs.readFileSync('test/portrait.png'), decoder.read('test/portrait.png'));
-      assert.deepEqual(fs.readFileSync('test/xml.dae'), decoder.read('test/xml.dae'));
-      cb();
+      encoder.write('test/test.wb.png', function(err) {
+        if (err) return cb(err);
+        var decoder = new wb.Bundle();
+        decoder.load('test/test.wb.png', function(err) {
+          if (err) return cb(err);
+          assert.deepEqual(fs.readFileSync('test/data.json'), decoder.read('test/data.json'));
+          assert.deepEqual(fs.readFileSync('test/portrait.png'), decoder.read('test/portrait.png'));
+          assert.deepEqual(fs.readFileSync('test/xml.dae'), decoder.read('test/xml.dae'));
+          fs.unlinkSync('test/test.wb.png');
+          cb();
+        });
+      });
     });
-  }
+  },
 ], function(err) {
   if (err) {
     throw err;
