@@ -1,6 +1,0 @@
-F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\obj\x86\Debug\jsc.exe
-F:\development\project\cs\thelab\JavascriptPNGEncoder\encoder\obj\x86\Debug\jsc.pdb
-F:\development\project\web\thelab\js-compressor\encoder\bin\Debug\jsc.exe
-F:\development\project\web\thelab\js-compressor\encoder\bin\Debug\jsc.pdb
-F:\development\project\web\thelab\js-compressor\encoder\obj\x86\Debug\jsc.exe
-F:\development\project\web\thelab\js-compressor\encoder\obj\x86\Debug\jsc.pdb
