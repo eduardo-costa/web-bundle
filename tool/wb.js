@@ -25,7 +25,7 @@ var argv = require('yargs')
   })
   .options('o', {
     alias: 'output',
-    describe: 'Output location for encoded bundle or extracted files. Defaults to ./ for decode and ./data.wb.png for encode'
+    describe: 'Output location for encoded bundle or extracted files. Defaults to ./ for decode and ./data.wb for encode'
   })
   .options('a', {
     alias: 'add',
@@ -58,7 +58,7 @@ switch(command) {
     break;
 
   case 'encode':
-    argv.output = argv.output || './data.wb.png';
+    argv.output = argv.output || './data.wb';
     encode(files, argv);
     break;
 }
