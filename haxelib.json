@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": ["hmtl5","pack","lossless","bundle","compression","png","binary","encrypt"],
   "description": "Web Bundle Data Packer",
-  "version": "1.1.3",
-  "releasenotes": "1.1.3",
+  "version": "1.1.4",
+  "releasenotes": "1.1.4",
   "contributors": ["eduardo_costa"],
   "dependencies": 
   {
