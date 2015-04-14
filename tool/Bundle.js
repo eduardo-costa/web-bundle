@@ -1,6 +1,5 @@
 var fs = require('fs'),
   path = require('path'),
-  PNG = require('png-js'),
   nodePng = require('node-png');
 
 function Bundle(key) {
@@ -25,13 +24,13 @@ Bundle.prototype.files = function() {
 // Load a png file and decode it
 Bundle.prototype.load = function(filename, cb) {
   var self = this;
-  fs.readFile(filename, function(err, data) {
-    if (err) return cb(err);
-    (new PNG(data)).decode(function(pixels) {
-      self.decode(stripAlpha(pixels));
+  fs.createReadStream(filename)
+    .pipe(new nodePng.PNG())
+    .on('parsed', function() {
+      self.decode(stripAlpha(this.data));
       cb();
-    });
-  });
+    })
+    .on('error', cb);
 };
 
 // Decode a pixel buffer
