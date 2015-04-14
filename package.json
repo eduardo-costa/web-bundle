@@ -21,12 +21,10 @@
   },
   "dependencies": {
     "async": "^0.9.0",
-    "png": "^3.0.3",
-    "png-js": "^0.1.1",
+    "node-png": "^0.4.3",
     "yargs": "^3.7.0"
   },
-  "contributors":
-	[
-	"Joe Dytrych <j@dytry.ch> http://j.dytry.ch/"
-	]
+  "contributors": [
+    "Joe Dytrych <j@dytry.ch> http://j.dytry.ch/"
+  ]
 }

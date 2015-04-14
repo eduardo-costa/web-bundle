@@ -1,7 +1,6 @@
 var fs = require('fs'),
   path = require('path'),
-  PNG = require('png-js'),
-  PngEncoder = require('png').Png;
+  nodePng = require('node-png');
 
 function Bundle(key) {
   if (key) {
@@ -25,13 +24,13 @@ Bundle.prototype.files = function() {
 // Load a png file and decode it
 Bundle.prototype.load = function(filename, cb) {
   var self = this;
-  fs.readFile(filename, function(err, data) {
-    if (err) return cb(err);
-    (new PNG(data)).decode(function(pixels) {
-      self.decode(stripAlpha(pixels));
+  fs.createReadStream(filename)
+    .pipe(new nodePng.PNG())
+    .on('parsed', function() {
+      self.decode(stripAlpha(this.data));
       cb();
-    });
-  });
+    })
+    .on('error', cb);
 };
 
 // Decode a pixel buffer
@@ -97,27 +96,29 @@ Bundle.prototype.addFile = function(name, options, cb) {
   });
 };
 
-Bundle.prototype.write = function(file, cb) {
-  this.encode(function(err, png, original) {
-    if (err) return cb(err);
-    fs.writeFile(file, png, function(err) {
-      if (err) return cb(err);
-      cb(null, png.length, original.length);
-    });
-  });
-};
-
-Bundle.prototype.encode = function(cb) {
+Bundle.prototype.write = function(filename, cb) {
   var channels = 3,
     buffer = this.toBuffer(),
     pixelCount = Math.ceil(buffer.length / channels),
     width = Math.ceil(Math.sqrt(pixelCount)),
     height = Math.ceil(pixelCount / width),
-    png = new PngEncoder(buffer, width, height, 'rgb');
+    png = new nodePng.PNG({width: width, height: height}),
+    i, srcIdx, dstIdx, file;
 
-  png.encode(function(data, err) {
-    cb(err, data, buffer);
+  for (i = 0; i < pixelCount; i++) {
+    srcIdx = i * 3;
+    dstIdx = i * 4;
+    png.data[dstIdx] = buffer[srcIdx];
+    png.data[dstIdx + 1] = buffer[srcIdx + 1];
+    png.data[dstIdx + 2] = buffer[srcIdx + 2];
+    png.data[dstIdx + 3] = 255;
+  }
+
+  file = fs.createWriteStream(filename);
+  file.on('close', function() {
+    cb(null, file.bytesWritten, png.data.length);
   });
+  png.pack().pipe(file);
 };
 
 // Convert a bundle to a buffer, containing header data and the contents of each file
